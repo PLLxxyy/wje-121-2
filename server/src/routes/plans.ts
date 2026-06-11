@@ -15,18 +15,27 @@ router.post('/', (req: Request, res: Response) => {
     return;
   }
 
+  let targetTimeMinutes = input.target_time;
+  if (targetTimeMinutes > 500) {
+    targetTimeMinutes = targetTimeMinutes / 60;
+  }
+  const normalizedInput: PlanInput = {
+    ...input,
+    target_time: targetTimeMinutes,
+  };
+
   // Deactivate previous active plans
   db.prepare("UPDATE plans SET status = 'completed' WHERE user_id = ? AND status = 'active'").run(userId);
 
   // Create plan
   const result = db.prepare(
     'INSERT INTO plans (user_id, target_event, target_time, current_level, training_days, total_weeks) VALUES (?, ?, ?, ?, ?, 12)'
-  ).run(userId, input.target_event, input.target_time, input.current_level, input.training_days);
+  ).run(userId, normalizedInput.target_event, normalizedInput.target_time, normalizedInput.current_level, normalizedInput.training_days);
 
   const planId = result.lastInsertRowid as number;
 
   // Generate and insert plan days
-  const planDays = generatePlan(input);
+  const planDays = generatePlan(normalizedInput);
   const stmt = db.prepare(
     'INSERT INTO plan_days (plan_id, week_number, day_number, workout_type, target_distance_km, target_pace, description) VALUES (?, ?, ?, ?, ?, ?, ?)'
   );

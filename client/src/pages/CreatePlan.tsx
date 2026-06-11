@@ -19,7 +19,7 @@ export default function CreatePlan() {
     try {
       await api.createPlan({
         target_event: targetEvent,
-        target_time: targetTime * 60,
+        target_time: targetTime,
         current_level: currentLevel,
         training_days: trainingDays,
       });

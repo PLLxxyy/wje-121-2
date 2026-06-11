@@ -86,7 +86,13 @@ export default function TrainingCalendar() {
             {plan.target_event === 'full' ? '全程马拉松' : '半程马拉松'}
           </span>
           <span className="badge badge-warning">
-            目标 {Math.floor(plan.target_time / 60)}:{(plan.target_time % 60).toString().padStart(2, '0')}
+            {(() => {
+              let minutes = plan.target_time;
+              if (minutes > 500) minutes = minutes / 60;
+              const hours = Math.floor(minutes / 60);
+              const mins = Math.round(minutes % 60);
+              return `目标 ${hours}:${mins.toString().padStart(2, '0')}`;
+            })()}
           </span>
         </div>
       </div>
