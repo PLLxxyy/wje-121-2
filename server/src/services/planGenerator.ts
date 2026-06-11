@@ -8,9 +8,9 @@ function calculatePaces(input: PlanInput) {
   const distanceKm = input.target_event === 'full' ? 42.195 : 21.0975;
   let targetTimeMinutes = input.target_time;
   if (targetTimeMinutes > 500) {
-    targetTimeMinutes = targetTimeMinutes / 60;
+    targetTimeMinutes = Math.round(targetTimeMinutes / 60);
   }
-  const targetPaceMinPerKm = targetTimeMinutes / distanceKm; // min/km
+  const targetPaceMinPerKm = targetTimeMinutes / distanceKm;
 
   return {
     easy: targetPaceMinPerKm * 1.2,          // 轻松跑比目标慢20%

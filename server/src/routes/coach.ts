@@ -3,6 +3,13 @@ import db from '../db';
 
 const router = Router();
 
+function normalizePlanResponse(plan: any) {
+  if (plan && plan.target_time > 500) {
+    return { ...plan, target_time: Math.round(plan.target_time / 60) };
+  }
+  return plan;
+}
+
 // GET /api/coach/students - 教练获取学员列表
 router.get('/students', (req: Request, res: Response) => {
   const coachId = req.user!.userId;
@@ -71,7 +78,7 @@ router.get('/students/:studentId/plan', (req: Request, res: Response) => {
   const days = db.prepare('SELECT * FROM plan_days WHERE plan_id = ? ORDER BY week_number, day_number').all((plan as any).id);
   const checkins = db.prepare('SELECT * FROM checkins WHERE plan_id = ? AND user_id = ?').all((plan as any).id, studentId);
 
-  res.json({ ...(plan as any), days, checkins });
+  res.json({ ...normalizePlanResponse(plan as any), days, checkins });
 });
 
 // GET /api/coach/students/:studentId/stats - 查看学员统计数据

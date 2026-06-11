@@ -5,6 +5,20 @@ import { PlanInput } from '../types';
 
 const router = Router();
 
+function normalizeTargetTime(targetTime: number): number {
+  if (targetTime > 500) {
+    return Math.round(targetTime / 60);
+  }
+  return targetTime;
+}
+
+function normalizePlanResponse(plan: any) {
+  if (plan && plan.target_time > 500) {
+    return { ...plan, target_time: Math.round(plan.target_time / 60) };
+  }
+  return plan;
+}
+
 // POST /api/plans - 创建训练计划
 router.post('/', (req: Request, res: Response) => {
   const userId = req.user!.userId;
@@ -15,13 +29,9 @@ router.post('/', (req: Request, res: Response) => {
     return;
   }
 
-  let targetTimeMinutes = input.target_time;
-  if (targetTimeMinutes > 500) {
-    targetTimeMinutes = targetTimeMinutes / 60;
-  }
   const normalizedInput: PlanInput = {
     ...input,
-    target_time: targetTimeMinutes,
+    target_time: normalizeTargetTime(input.target_time),
   };
 
   // Deactivate previous active plans
@@ -65,14 +75,14 @@ router.get('/active', (req: Request, res: Response) => {
   // Get checkins for this plan
   const checkins = db.prepare('SELECT * FROM checkins WHERE plan_id = ? AND user_id = ?').all((plan as any).id, userId);
 
-  res.json({ ...(plan as any), days, checkins });
+  res.json({ ...normalizePlanResponse(plan as any), days, checkins });
 });
 
 // GET /api/plans - 获取用户所有计划
 router.get('/', (req: Request, res: Response) => {
   const userId = req.user!.userId;
   const plans = db.prepare('SELECT * FROM plans WHERE user_id = ? ORDER BY created_at DESC').all(userId);
-  res.json(plans);
+  res.json(plans.map(normalizePlanResponse));
 });
 
 // GET /api/plans/:id - 获取指定计划详情
@@ -89,7 +99,7 @@ router.get('/:id', (req: Request, res: Response) => {
   const days = db.prepare('SELECT * FROM plan_days WHERE plan_id = ? ORDER BY week_number, day_number').all(planId);
   const checkins = db.prepare('SELECT * FROM checkins WHERE plan_id = ? AND user_id = ?').all(planId, userId);
 
-  res.json({ ...(plan as any), days, checkins });
+  res.json({ ...normalizePlanResponse(plan as any), days, checkins });
 });
 
 // PATCH /api/plans/:id/complete - 完成计划
