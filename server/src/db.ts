@@ -4,14 +4,13 @@ import bcrypt from 'bcryptjs';
 
 const DB_PATH = path.join(__dirname, '..', 'data', 'marathon.db');
 
-// Ensure data directory exists
 import fs from 'fs';
 const dataDir = path.join(__dirname, '..', 'data');
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
 
-const db = new Database(DB_PATH);
+const db: InstanceType<typeof Database> = new Database(DB_PATH);
 
 // Enable WAL mode for better concurrency
 db.pragma('journal_mode = WAL');

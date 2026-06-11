@@ -28,10 +28,10 @@ export default function TrainingCalendar() {
       if (data?.days?.length > 0) {
         // Find current week based on plan start
         const weeksActive = data.days.filter((d: any) => d.workout_type !== 'rest').length;
-        const checkinWeeks = new Set(data.checkins?.map((c: any) => {
+        const checkinWeeks = new Set<number>(data.checkins?.map((c: any) => {
           const day = data.days.find((d: any) => d.id === c.plan_day_id);
           return day?.week_number;
-        }) || []);
+        }).filter((w: number | undefined) => w != null) || []);
         // Set to next unchecked week or max week
         let maxCheckedWeek = 0;
         checkinWeeks.forEach(w => { if (w && w > maxCheckedWeek) maxCheckedWeek = w; });
